@@ -6,8 +6,9 @@ const fs = require("fs");
 const path = require("path");
 const watchConfig = require("./watch.config");
 const colors = require("colors");
-const getStatusColor = require("./getStatusColor");
-module.exports = function(app, configpath) {
+const statusHandler = require("./status.handler");
+const nuxtHandler = require("./nuxt.handler");
+module.exports = async function(app, configpath) {
     let _origin_config;
     try {
         _origin_config = require(configpath)
@@ -15,19 +16,16 @@ module.exports = function(app, configpath) {
         console.log(e);
     }
     config = Object.assign({}, defaultConfig, _origin_config);
-    app.use(async function(ctx, next) {
-            let begin = new Date();
-            await next();
-            let end = new Date();
-            let status = (ctx.status + "")[getStatusColor(ctx.status)]
-            console.log(`[${begin.toDateString()}]`, `${ctx.host} `.cyan, `${ctx.request.method} `.green, `${ctx.url}`.yellow, status, `${end.getTime() - begin.getTime()}ms`.bgBlue);
-        })
-        // 静态目录的管理
+    process.env.PORT = config.port;
+    // 初始化nuxt
+    app.use(statusHandler);
+    // // 静态目录的管理
     app.use(staticHandler(config.static));
-    // 路由目录的处理
-    app.use(routerHandler(config.routers));
-    // 监听文件
+    // // 路由目录的处理
+    // app.use(routerHandler(config.routers));;
+    app.use(nuxtHandler(await nuxtHandler.initNuxt(require(path.join(__dirname, "../nuxt.config.js")))));
     app.listen(config.port);
+    // 监听文件
     let subject = watchConfig(configpath);
     subject.subscribe((value) => {
         if (value) {

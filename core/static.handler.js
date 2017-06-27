@@ -39,10 +39,12 @@ function staticHandler(config) {
                     staticHandler.sendFile(ctx, lastfilepath.path);
                 }
                 //staticHandler.sendFile(ctx, lastfilepath.path);
+            } else {
+                await next()
             }
 
         } catch (e) {
-            next();
+            await next()
         }
     };
 };

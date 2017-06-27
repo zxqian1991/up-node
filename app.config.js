@@ -9,9 +9,7 @@ module.exports = {
             // 公共的路径 最先访问
             "$public": [
                 // web在的目录
-                path.join(__dirname, 'www'),
-                // 其他的静态目录
-                path.join(__dirname, 'static'),
+
             ],
             // ip地址访问时的路径
             "$ip": [
@@ -23,13 +21,10 @@ module.exports = {
         // 静态文件的映射 根据映射去查找对应的路径 mappinp的优先级最高
         mapping: {
             "$public": {
-                "index.js$": "utils/exists.js"
+                "index.js$": path.join(__dirname, "./utils/exists.js")
             },
             "$ip": {
-                "asd.js": {
-                    value: "laskmalkdmkas",
-                    root: "adad/asdas/asd"
-                }
+
             }
         }
     },

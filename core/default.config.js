@@ -5,8 +5,7 @@ module.exports = {
         pre: "./",
         root: {
             "$public": [
-                path.resolve("./www"),
-                path.resolve("./static")
+
             ]
         }
     }
