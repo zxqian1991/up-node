@@ -4,6 +4,9 @@ const routerHandler = require("./router.handler");
 const rx = require("rxjs");
 const fs = require("fs");
 const path = require("path");
+const watchConfig = require("./watch.config");
+const colors = require("colors");
+const getStatusColor = require("./getStatusColor");
 module.exports = function(app, configpath) {
     let _origin_config;
     try {
@@ -12,47 +15,34 @@ module.exports = function(app, configpath) {
         console.log(e);
     }
     config = Object.assign({}, defaultConfig, _origin_config);
-    // 静态目录的管理
+    app.use(async function(ctx, next) {
+            let begin = new Date();
+            await next();
+            let end = new Date();
+            let status = (ctx.status + "")[getStatusColor(ctx.status)]
+            console.log(`[${begin.toDateString()}]`, `${ctx.host} `.cyan, `${ctx.request.method} `.green, `${ctx.url}`.yellow, status, `${end.getTime() - begin.getTime()}ms`.bgBlue);
+        })
+        // 静态目录的管理
     app.use(staticHandler(config.static));
     // 路由目录的处理
     app.use(routerHandler(config.routers));
-    // 
+    // 监听文件
     app.listen(config.port);
-    let subject = new rx.BehaviorSubject();
-    try {
-        fs.watch(configpath, function(type, filename) {
+    let subject = watchConfig(configpath);
+    subject.subscribe((value) => {
+        if (value) {
+            if (value.filename != path.basename(configpath)) {
+                configpath = value.configpath;
+            }
+            delete require.cache[configpath];
+            let _origin_config;
             try {
-                configpath = path.join(path.dirname(configpath), filename);
-                // console.log(type, configpath);
-                subject.next({
-                    type,
-                    filename
-                })
-
+                _origin_config = require(configpath)
             } catch (e) {
                 console.log(e);
             }
-        });
-    } catch (e) {
-        console.log(`监听文件${configpath}出错`, e)
-    }
-    // 等待三秒
-    subject.debounceTime(2000)
-        .distinctUntilChanged()
-        .subscribe((value) => {
-            if (value) {
-                if (value.filename != path.basename(configpath)) {
-                    configpath = path.join(path.dirname(configpath), value.filename);
-                }
-                delete require.cache[configpath];
-                let _origin_config;
-                try {
-                    _origin_config = require(configpath)
-                } catch (e) {
-                    console.log(e);
-                }
-                config = Object.assign({}, defaultConfig, _origin_config);
-                staticHandler.setConfig(config.static);
-            }
-        })
+            config = Object.assign({}, defaultConfig, _origin_config);
+            staticHandler.setConfig(config.static);
+        }
+    });
 };

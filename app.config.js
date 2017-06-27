@@ -23,8 +23,7 @@ module.exports = {
         // 静态文件的映射 根据映射去查找对应的路径 mappinp的优先级最高
         mapping: {
             "$public": {
-                "*asd.js": "a/v/c/sa.js",
-                "index.js": "utils/exists.js"
+                "index.js$": "utils/exists.js"
             },
             "$ip": {
                 "asd.js": {
@@ -34,7 +33,7 @@ module.exports = {
             }
         }
     },
-    // 根据请求路径的路由处理
+    // 根据请求路径的路由处理  这里是处理文件而不是单独的发送文本  是需要执行的部分
     routers: {
         root: [
             path.join(__dirname, "routers")

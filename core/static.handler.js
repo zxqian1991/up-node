@@ -3,6 +3,8 @@ const getFullPath = require("../utils/getFullPath");
 const fs = require("fs");
 const exists = require("../utils/exists");
 const mime = require('mime');
+const render = require("./render");
+const colors = require('colors');
 /**
  * 静态文件处理器
  */
@@ -23,9 +25,20 @@ function staticHandler(config) {
             if (!lastfilepath && staticHandler.config.root) {
                 lastfilepath = await staticHandler.analyseMapping(ctx, staticHandler.config.root, pre)
             }
-            // console.log(lastfilepath);
             if (lastfilepath) {
-                staticHandler.sendFile(ctx, lastfilepath);
+                if (lastfilepath.type == "directory") {
+                    // 查看根目录下是否有index.html
+                    let index = "index.html"
+                    if (staticHandler.hasIndex(lastfilepath.path, index)) {
+                        staticHandler.sendFile(ctx, getFullPath(index, lastfilepath.path));
+                    } else {
+                        // 不存在
+                        render(ctx, getFullPath("../default/files.vue", __dirname), lastfilepath.path);
+                    }
+                } else if (lastfilepath.type == "file") {
+                    staticHandler.sendFile(ctx, lastfilepath.path);
+                }
+                //staticHandler.sendFile(ctx, lastfilepath.path);
             }
 
         } catch (e) {
@@ -57,7 +70,6 @@ staticHandler.analyseMapping = async function(ctx, mapping, pre) {
     // 到这步还没有找到，那说明可能需要使用public
     if (mapping.hasOwnProperty("$public")) {
         let lastPath = await staticHandler.getMappingPath(ctx, mapping["$public"], pre);
-        debugger;
         if (lastPath) {
             return lastPath;
         };
@@ -80,11 +92,13 @@ staticHandler.getMappingPath = async function(ctx, obj, pre) {
                 } catch (e) {
                     console.log("Regexp error", e)
                 }
+            } else {
+                // 是数组 
             }
             if (isArray || (matches && matches.length > 0)) {
                 // 获得绝对路径
                 try {
-                    let realPath = await staticHandler.getUrlRealPath(obj[url], pre);
+                    let realPath = await staticHandler.getUrlRealPath(obj[url], ctx.url, !isArray, pre);
                     if (realPath) {
                         return realPath;
                     }
@@ -109,14 +123,14 @@ staticHandler.analyseHost = function(host, protocol) {
 /**
  * 对配置进行遍历 根据 host  /  url 去进行模糊匹配
  */
-staticHandler.getUrlRealPath = async function(fullpath, pre) {
+staticHandler.getUrlRealPath = async function(fullpath, url, isMapping, pre) {
     let type = typeof fullpath;
     pre = pre || getFullPath('');
     if (type == "object") {
         if (fullpath instanceof Array) {
             // 是数组
             for (let i in fullpath) {
-                let result_path = await getUrlRealPath(fullpath[i], pre);
+                let result_path = await getUrlRealPath(fullpath[i], url, isMapping, pre);
                 if (result_path) {
                     return result_path;
                 }
@@ -127,31 +141,37 @@ staticHandler.getUrlRealPath = async function(fullpath, pre) {
             fullpath = getFullPath(fullpath.value || '', root);
         }
     } else {
-        fullpath = getFullPath(fullpath, pre);
+        fullpath = getFullPath(isMapping ? fullpath : path.join(fullpath, url), pre);
     }
     let status = await exists(fullpath);
     if (status) {
-        if (status.isDirectory()) {
-            // 是文件夹
-            let _html_path = getFullPath("index.html", fullpath);
-            let _exists_html = await exists(_html_path);
-            if (_exists_html && _exists_html.isFile()) {
-                // 存在
-                return _html_path;
-            }
-        } else if (status.isFile()) {
-            return fullpath;
+        return {
+            path: fullpath,
+            type: status.isDirectory() ? "directory" : (status.isFile() ? "file" : "other")
         }
     }
     return null;
 }
+staticHandler.hasIndex = async function(folder, index) {
+    index = index || "index.html"
+    let _html_path = getFullPath(index, folder);
+    let _exists_html = await exists(_html_path);
+    if (_exists_html && _exists_html.isFile()) {
+        return true
+    }
+    return false;
+}
 staticHandler.sendFile = function(ctx, realpath) {
     let type = mime.lookup(realpath);
-    const content = fs.readFileSync(realpath, 'binary');
-    ctx.type = type;
-    ctx.res.writeHead(200);
-    ctx.res.write(content, 'binary');
-    ctx.res.end();
+    try {
+        const content = fs.readFileSync(realpath, 'binary');
+        ctx.type = type;
+        ctx.res.writeHead(200);
+        ctx.res.write(content, 'binary');
+        ctx.res.end();
+    } catch (e) {
+        console.log(e);
+    }
 };
 staticHandler.setConfig = function(config) {
     staticHandler.config = config;
