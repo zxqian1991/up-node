@@ -8,10 +8,12 @@
 <script>
 import NuxtLoading from './components/nuxt-loading.vue'
 
+import '~assets/css/main.css'
+
 
 let layouts = {
 
-  "_default": () => import('/Users/qianzhixiang/test/vue/vue-typescript/node_modules/nuxt/dist/app/layouts/default.vue'  /* webpackChunkName: "layouts/default" */)
+  "_default": () => import('/Users/qianzhixiang/test/vue/vue-typescript/layouts/default.vue'  /* webpackChunkName: "layouts/default" */)
 
 }
 

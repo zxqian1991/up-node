@@ -25,6 +25,7 @@ module.exports = async function(app, configpath) {
     // app.use(routerHandler(config.routers));;
     app.use(nuxtHandler(await nuxtHandler.initNuxt(require(path.join(__dirname, "../nuxt.config.js")))));
     app.listen(config.port);
+    console.log("Server is Running at".white, `http://127.0.0.1:${config.port}`.blue);
     // 监听文件
     let subject = watchConfig(configpath);
     subject.subscribe((value) => {
