@@ -35,7 +35,10 @@ module.exports = {
         ],
         // 对路径的特殊的处理
         mapping: {
-
-        }
+            "$public": {
+                "mk$": "./routers/index.js"
+            }
+        },
+        pre: "./"
     }
 };

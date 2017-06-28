@@ -19,7 +19,7 @@ export default {
     console.log(test);
   },
   asyncData ({ req }) {
-    return axios.get("https://api.myjson.com/bins/iup2b")
+    return axios.get("/mk")
       .then((res)=>{
         return res.data;
       });

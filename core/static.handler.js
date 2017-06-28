@@ -90,7 +90,7 @@ staticHandler.getMappingPath = async function(ctx, obj, pre) {
 
                 try {
                     let reg = new RegExp(url, "gi");
-                    matches = ctx.url.match(reg);
+                    matches = ctx.path.match(reg);
                 } catch (e) {
                     console.log("Regexp error", e)
                 }
@@ -100,7 +100,7 @@ staticHandler.getMappingPath = async function(ctx, obj, pre) {
             if (isArray || (matches && matches.length > 0)) {
                 // 获得绝对路径
                 try {
-                    let realPath = await staticHandler.getUrlRealPath(obj[url], ctx.url, !isArray, pre);
+                    let realPath = await staticHandler.getUrlRealPath(obj[url], ctx.path, !isArray, pre);
                     if (realPath) {
                         return realPath;
                     }

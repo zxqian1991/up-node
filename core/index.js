@@ -22,7 +22,7 @@ module.exports = async function(app, configpath) {
     // // 静态目录的管理
     app.use(staticHandler(config.static));
     // // 路由目录的处理
-    // app.use(routerHandler(config.routers));;
+    app.use(routerHandler(config.routers));;
     app.use(nuxtHandler(await nuxtHandler.initNuxt(require(path.join(__dirname, "../nuxt.config.js")))));
     app.listen(config.port);
     console.log("Server is Running at".white, `http://127.0.0.1:${config.port}`.blue);
@@ -42,6 +42,7 @@ module.exports = async function(app, configpath) {
             }
             config = Object.assign({}, defaultConfig, _origin_config);
             staticHandler.setConfig(config.static);
+            routerHandler.setConfig(config.root);
         }
     });
 };
