@@ -2,7 +2,7 @@
   <section class="container">
     <img src="../assets/img/logo.png" alt="Nuxt.js Logo" class="logo" />
     <h1 class="title">
-      This page is loaded from the {{ name }}
+      This page is loaded from the {{ name }} {{titled}}
     </h1>
     <h2 class="info" v-if="name === 'client'">
       Please refresh the page
@@ -13,10 +13,24 @@
   </section>
 </template>
 <script>
+import axios from "axios";
 export default {
+  constructor(){
+    console.log(test);
+  },
   asyncData ({ req }) {
+    return axios.get("https://api.myjson.com/bins/iup2b")
+      .then((res)=>{
+        return res.data;
+      });
+    // return {
+    //   name: req ? 'server' : 'client'
+    // }
+  },
+  data(){
     return {
-      name: req ? 'server' : 'client'
+      name: "askklmlk",
+      titled: '快快快'
     }
   },
   head () {

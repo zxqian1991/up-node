@@ -6,6 +6,10 @@ module.exports = {
      */
     loading: { color: '#3B8070' },
     build: {
+        vender: [
+            "axios",
+            "rxjs"
+        ],
         loaders: [{
                 test: /\.(png|jpe?g|gif|svg)$/,
                 loader: 'url-loader',
