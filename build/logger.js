@@ -29,15 +29,12 @@ function getDefaultAppenders(config) {
     var root = config.root || cwd;
     function initAppender(name, _config) {
         logs.forEach(function (type, index) {
+            _config.filename = _config.filename || name + ".log";
             var _filename = _config.filename;
-            if (_filename) {
-                var dir = path.dirname(_filename);
-                var extname = path.extname(_filename);
-                var basename_1 = path.basename(_filename, extname);
-                _filename = path.join(dir, name + "-" + type + extname);
-            }
-            ;
-            var basename = path.basename(_config.filename);
+            var dir = path.dirname(_filename);
+            var extname = path.extname(_filename);
+            var basename = path.basename(_filename, extname);
+            _filename = path.join(dir, basename + "/" + type + extname);
             var fileappender = {
                 type: "DateFile",
                 category: [
@@ -45,7 +42,9 @@ function getDefaultAppenders(config) {
                 ],
                 filename: util_1.default
                     .path
-                    .getFullPath(_filename ? _filename : name + "-" + type + ".log", root),
+                    .getFullPath(_filename
+                    ? _filename
+                    : name + "/" + type + ".log", root),
                 pattern: "-yyyy-MM-dd.log",
                 alwaysIncludePattern: true
             };

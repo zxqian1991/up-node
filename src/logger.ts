@@ -32,14 +32,12 @@ function getDefaultAppenders(config : UnionLogConfig) {
     let root = config.root || cwd;
     function initAppender(name : string, _config : any) {
         logs.forEach((type : string, index : number) => {
+            _config.filename = _config.filename || `${name}.log`;
             let _filename = _config.filename;
-            if(_filename) {
-                let dir = path.dirname(_filename);
-                let extname = path.extname(_filename);
-                let basename = path.basename(_filename,extname);
-                _filename = path.join(dir,`${name}-${type}${extname}`);
-            };
-            let basename = path.basename(_config.filename);
+            let dir = path.dirname(_filename);
+            let extname = path.extname(_filename);
+            let basename = path.basename(_filename, extname);
+            _filename = path.join(dir, `${basename}/${type}${extname}`);
             let fileappender = {
                 type: "DateFile",
                 category: [
@@ -47,7 +45,9 @@ function getDefaultAppenders(config : UnionLogConfig) {
                 ],
                 filename: util
                     .path
-                    .getFullPath(_filename ? _filename : `${name}-${type}.log`, root),
+                    .getFullPath(_filename
+                        ? _filename
+                        : `${name}/${type}.log`, root),
                 pattern: "-yyyy-MM-dd.log",
                 alwaysIncludePattern: true
             };
