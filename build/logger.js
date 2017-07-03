@@ -99,19 +99,6 @@ var UnionLog = (function () {
         getDefaultAppenders(me.config);
     };
     ;
-    UnionLog.prototype.getDefaultOptionConfig = function (type) {
-        var me = this;
-        return {
-            useDefault: false,
-            root: cwd,
-            config: {
-                filename: "trace/" + type + ".log",
-                date: true,
-                path: []
-            }
-        };
-    };
-    ;
     UnionLog.prototype.trace = function (content, type
         // 后续支持，意义不大
     ) {

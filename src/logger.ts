@@ -95,18 +95,6 @@ export default class UnionLog {
         let me = this;
         getDefaultAppenders(me.config);
     };
-    private getDefaultOptionConfig(type : string) : UnionLogOptionConfig {
-        let me = this;
-        return {
-            useDefault: false, // 默认不使用默认的配置
-            root: cwd, // 默认的根目录即使程序的启动目录
-            config: {
-                filename: `trace/${type}.log`,
-                date: true,
-                path: []
-            }
-        };
-    };
     trace(content : string, type : number = 0
     // 后续支持，意义不大
     ) {
@@ -200,11 +188,3 @@ export interface UnionLogConfig {
     },
     layout?: string;
 };
-export interface UnionLogOptionConfig {
-    useDefault?: boolean; // 是否使用默认配置
-    root?: string | string[]; // 使用自定义的存放路径  根路径
-    config?: {
-        filename: string; // 保存的文件名称
-        path?: string | string[]; // 相对于root的路径
-    }
-}

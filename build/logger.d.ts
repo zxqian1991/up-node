@@ -5,7 +5,6 @@ export default class UnionLog {
     private logger;
     private log(content, level?, type?);
     private initLoggers();
-    private getDefaultOptionConfig(type);
     trace(content: string, type?: number): void;
     debug(content: string, type?: number): void;
     info(content: string, type?: number): void;
@@ -42,12 +41,4 @@ export interface UnionLogConfig {
         };
     };
     layout?: string;
-}
-export interface UnionLogOptionConfig {
-    useDefault?: boolean;
-    root?: string | string[];
-    config?: {
-        filename: string;
-        path?: string | string[];
-    };
 }
