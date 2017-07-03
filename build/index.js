@@ -49,18 +49,20 @@ var UnionApp = (function () {
         }
         ;
         me.initConfig(config).then(function () { return __awaiter(_this, void 0, void 0, function () {
+            var logger;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         me.logger = new logger_1.default(me.config.logger);
-                        me.logger.trace("\u6B63\u5728\u542F\u52A8\u7A0B\u5E8F\u8BF7\u7A0D\u540E...".blue);
+                        me.logger.info("\u6B63\u5728\u542F\u52A8\u7A0B\u5E8F\u8BF7\u7A0D\u540E...".blue);
                         process.env.PORT = me.config.port.toString();
                         me.app = new Koa();
                         return [4 /*yield*/, me.initApp()];
                     case 1:
                         _a.sent();
                         me.app.listen(me.config.port);
-                        me.logger.error(("\u7A0B\u5E8F\u5DF2\u542F\u52A8,\u8BF7\u8BBF\u95EE" + util_1.default.interface.getBeautyStrOfIp(me.config.port)).green);
+                        me.logger.info(("\u7A0B\u5E8F\u5DF2\u542F\u52A8,\u8BF7\u8BBF\u95EE" + util_1.default.interface.getBeautyStrOfIp(me.config.port)).green);
+                        logger = logger_1.default.getLogger("qianzhixiang");
                         return [2 /*return*/];
                 }
             });
@@ -91,5 +93,3 @@ var UnionApp = (function () {
 }());
 exports.UnionApp = UnionApp;
 ;
-var logger = logger_1.default.getLogger("qianzhixiang");
-logger.info("情况数据看那看季度年");

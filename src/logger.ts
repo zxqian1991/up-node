@@ -19,44 +19,50 @@ const logs : string[] = [
 function getDefaultConfig() {
     let obj : any = {
         root: path.join(cwd, "logs"),
-        files: {}
+        loggers: {
+            default: {
+                filename: ``
+            }
+        }
     };
-    logs.forEach((value : string, index : number) => {
-        obj.files[value] = {
-            date: true,
-            filename: `${value}.log`
-        };
-    });
     return obj;
 };
 function getDefaultAppenders(config : UnionLogConfig) {
     let appenders : any[] = [];
-    let levels : {
-        [category : string] : string
-    } = {};
     let root = config.root || cwd;
-    for (let type in config.files) {
-        appenders.push({
-            type: "console",
-            category: [`${type}-console`, type]
+    function initAppender(name : string, _config : any) {
+        logs.forEach((type : string, index : number) => {
+            let _filename = _config.filename;
+            if(_filename) {
+                let dir = path.dirname(_filename);
+                let extname = path.extname(_filename);
+                let basename = path.basename(_filename,extname);
+                _filename = path.join(dir,`${name}-${type}${extname}`);
+            };
+            let basename = path.basename(_config.filename);
+            let fileappender = {
+                type: "DateFile",
+                category: [
+                    `${type}-file-${name}`, `${type}-${name}`, `${type}-file`, `${type}`
+                ],
+                filename: util
+                    .path
+                    .getFullPath(_filename ? _filename : `${name}-${type}.log`, root),
+                pattern: "-yyyy-MM-dd.log",
+                alwaysIncludePattern: true
+            };
+            let consoleappender = {
+                type: "console",
+                category: [`${type}-${name}`, `${type}-console-${name}`, `${type}-console`, `${type}`]
+            };
+            appenders.push(fileappender);
+            appenders.push(consoleappender);
         });
-        appenders.push({
-            type: config.files[type].date
-                ? "DateFile"
-                : "file",
-            filename: util
-                .path
-                .getFullPath(config.files[type].filename
-                    ? config.files[type].filename
-                    : `${type}.log`, root),
-            pattern: "-yyyy-MM-dd.log",
-            alwaysIncludePattern: true,
-            category: [`${type}-file`, type]
-        });
-        levels[type] = type;
-        levels[`${type}-console`] = type;
     };
-    log4js.configure({appenders: appenders, levels: levels});
+    for (let logger in config.loggers) {
+        initAppender(logger, config.loggers[logger]);
+    }
+    log4js.configure({appenders: appenders});
 }
 export default class UnionLog {
     constructor(config : any) {
@@ -82,13 +88,8 @@ export default class UnionLog {
     // type 0 都输出 1 console  2 file
     private log(content : string, level : string = "trace", type : number = 0) {
         let me = this;
-        let category = type == 0
-            ? `${level}`
-            : (type == 1
-                ? `${level}-console`
-                : `${level}-file`);
-        let logger = log4js.getLogger(category);
-        logger[level](content);
+        let logger = UnionLog.getLogger("default");
+        logger[level](content, type);
     };
     private initLoggers() {
         let me = this;
@@ -132,76 +133,69 @@ export default class UnionLog {
         let me = this;
         me.log(content, "fatal", type);
     };
-    // 新增一个Logger
-    static addLogger(config : {
-        name: string;
-        filename: string;
-    }) {
-        logs.forEach((type : string, index : number) => {
-            let fileappender = {
-                type: "DateFile",
-                category: [`${type}-file-${config.name}`,`${type}-${config.name}`,`${type}-file`,`${type}`],
-                filename: config.filename || `${config.name}-${type}.log`,
-                pattern: "-yyyy-MM-dd.log",
-                alwaysIncludePattern: true,
-            };
-            let consoleappender = {
-                type: "console",
-                category: [`${type}-${config.name}`,`${type}-console-${config.name}`,`${type}-console`,`${type}`],
-            };
-            log4js.addAppender(consoleappender);
-        });
-    };
     // 获取对应的logger
-    static getLogger(type: string){
+    static getLogger(type : string) {
         return new UnionSingleLogger(type);
-    }
+    };
     // 动态的添加到某个文件中呢？怎么将内容动态的添加到某个动态的地址中
 };
 export class UnionSingleLogger {
-    constructor(name: string){
+    constructor(name : string) {
         let me = this;
         me.name = name;
     };
-    private name: string;
-    private log(logtype: string,content: string,outtype : number = 0){
+    private name : string;
+    private log(logtype : string, content : string, outtype : number = 0) {
         let me = this;
-        let str = outtype == 0 ? `${logtype}-${me.name}` : (outtype == 1 ? `${logtype}-console-${me.name}` : (outtype == 2 ? `${logtype}-file-${me.name}` : `${logtype}`));
+        let str = outtype == 0
+            ? `${logtype}-${me.name}`
+            : (outtype == 1
+                ? `${logtype}-console-${me.name}`
+                : (outtype == 2
+                    ? `${logtype}-file-${me.name}`
+                    : `${logtype}`));
         let logger = log4js.getLogger(str);
         logger[logtype](content);
     }
-    trace(content: string,type : number = 0){
+    trace(content : string, type : number = 0) {
         let me = this;
-        me.log("trace",content,type);
+        me.log("trace", content, type);
     };
-    debug(content: string,type : number = 0){
+    debug(content : string, type : number = 0) {
         let me = this;
-        me.log("debug",content,type);
+        me.log("debug", content, type);
     };
-    info(content: string,type : number = 0){
+    info(content : string, type : number = 0) {
         let me = this;
-        me.log("info",content,type);
+        me.log("info", content, type);
     };
-    warn(content: string,type : number = 0){
+    warn(content : string, type : number = 0) {
         let me = this;
-        me.log("warn",content,type);
+        me.log("warn", content, type);
     };
-    error(content: string,type : number = 0){
+    error(content : string, type : number = 0) {
         let me = this;
-        me.log("error",content,type);
+        me.log("error", content, type);
     };
-    fatal(content: string,type : number = 0){
+    fatal(content : string, type : number = 0) {
         let me = this;
-        me.log("fatal",content,type);
+        me.log("fatal", content, type);
     };
 }
 export interface UnionLogConfig {
     root : string;
-    files : {
+    default : {
         [props : string]: {
             date: boolean;
             filename: string;
             path?: string | string[]
+        }
+    },
+    loggers : {
+        [logname : string]: {
+            date: boolean;
+            filename: string;
+            path?: string | string[];
         }
     },
     layout?: string;
@@ -211,7 +205,6 @@ export interface UnionLogOptionConfig {
     root?: string | string[]; // 使用自定义的存放路径  根路径
     config?: {
         filename: string; // 保存的文件名称
-        date: boolean; // 是否使用日期格式
         path?: string | string[]; // 相对于root的路径
     }
 }

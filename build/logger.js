@@ -15,44 +15,53 @@ var logs = [
 function getDefaultConfig() {
     var obj = {
         root: path.join(cwd, "logs"),
-        files: {}
+        loggers: {
+            default: {
+                filename: ""
+            }
+        }
     };
-    logs.forEach(function (value, index) {
-        obj.files[value] = {
-            date: true,
-            filename: value + ".log"
-        };
-    });
     return obj;
 }
 ;
 function getDefaultAppenders(config) {
     var appenders = [];
-    var levels = {};
     var root = config.root || cwd;
-    for (var type in config.files) {
-        appenders.push({
-            type: "console",
-            category: [type + "-console", type]
+    function initAppender(name, _config) {
+        logs.forEach(function (type, index) {
+            var _filename = _config.filename;
+            if (_filename) {
+                var dir = path.dirname(_filename);
+                var extname = path.extname(_filename);
+                var basename_1 = path.basename(_filename, extname);
+                _filename = path.join(dir, name + "-" + type + extname);
+            }
+            ;
+            var basename = path.basename(_config.filename);
+            var fileappender = {
+                type: "DateFile",
+                category: [
+                    type + "-file-" + name, type + "-" + name, type + "-file", "" + type
+                ],
+                filename: util_1.default
+                    .path
+                    .getFullPath(_filename ? _filename : name + "-" + type + ".log", root),
+                pattern: "-yyyy-MM-dd.log",
+                alwaysIncludePattern: true
+            };
+            var consoleappender = {
+                type: "console",
+                category: [type + "-" + name, type + "-console-" + name, type + "-console", "" + type]
+            };
+            appenders.push(fileappender);
+            appenders.push(consoleappender);
         });
-        appenders.push({
-            type: config.files[type].date
-                ? "DateFile"
-                : "file",
-            filename: util_1.default
-                .path
-                .getFullPath(config.files[type].filename
-                ? config.files[type].filename
-                : type + ".log", root),
-            pattern: "-yyyy-MM-dd.log",
-            alwaysIncludePattern: true,
-            category: [type + "-file", type]
-        });
-        levels[type] = type;
-        levels[type + "-console"] = type;
     }
     ;
-    log4js.configure({ appenders: appenders, levels: levels });
+    for (var logger in config.loggers) {
+        initAppender(logger, config.loggers[logger]);
+    }
+    log4js.configure({ appenders: appenders });
 }
 var UnionLog = (function () {
     function UnionLog(config) {
@@ -81,13 +90,8 @@ var UnionLog = (function () {
         if (level === void 0) { level = "trace"; }
         if (type === void 0) { type = 0; }
         var me = this;
-        var category = type == 0
-            ? "" + level
-            : (type == 1
-                ? level + "-console"
-                : level + "-file");
-        var logger = log4js.getLogger(category);
-        logger[level](content);
+        var logger = UnionLog.getLogger("default");
+        logger[level](content, type);
     };
     ;
     UnionLog.prototype.initLoggers = function () {
@@ -146,28 +150,11 @@ var UnionLog = (function () {
         me.log(content, "fatal", type);
     };
     ;
-    // 新增一个Logger
-    UnionLog.addLogger = function (config) {
-        logs.forEach(function (type, index) {
-            var fileappender = {
-                type: "DateFile",
-                category: [type + "-file-" + config.name, type + "-" + config.name, type + "-file", "" + type],
-                filename: config.filename || config.name + "-" + type + ".log",
-                pattern: "-yyyy-MM-dd.log",
-                alwaysIncludePattern: true,
-            };
-            var consoleappender = {
-                type: "console",
-                category: [type + "-" + config.name, type + "-console-" + config.name, type + "-console", "" + type],
-            };
-            log4js.addAppender(consoleappender);
-        });
-    };
-    ;
     // 获取对应的logger
     UnionLog.getLogger = function (type) {
         return new UnionSingleLogger(type);
     };
+    ;
     return UnionLog;
 }());
 exports.default = UnionLog;
@@ -181,7 +168,13 @@ var UnionSingleLogger = (function () {
     UnionSingleLogger.prototype.log = function (logtype, content, outtype) {
         if (outtype === void 0) { outtype = 0; }
         var me = this;
-        var str = outtype == 0 ? logtype + "-" + me.name : (outtype == 1 ? logtype + "-console-" + me.name : (outtype == 2 ? logtype + "-file-" + me.name : "" + logtype));
+        var str = outtype == 0
+            ? logtype + "-" + me.name
+            : (outtype == 1
+                ? logtype + "-console-" + me.name
+                : (outtype == 2
+                    ? logtype + "-file-" + me.name
+                    : "" + logtype));
         var logger = log4js.getLogger(str);
         logger[logtype](content);
     };

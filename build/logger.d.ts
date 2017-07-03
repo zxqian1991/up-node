@@ -12,10 +12,6 @@ export default class UnionLog {
     warn(content: string, type?: number): void;
     error(content: string, type?: number): void;
     fatal(content: string, type?: number): void;
-    static addLogger(config: {
-        name: string;
-        filename: string;
-    }): void;
     static getLogger(type: string): UnionSingleLogger;
 }
 export declare class UnionSingleLogger {
@@ -31,8 +27,15 @@ export declare class UnionSingleLogger {
 }
 export interface UnionLogConfig {
     root: string;
-    files: {
+    default: {
         [props: string]: {
+            date: boolean;
+            filename: string;
+            path?: string | string[];
+        };
+    };
+    loggers: {
+        [logname: string]: {
             date: boolean;
             filename: string;
             path?: string | string[];
@@ -45,7 +48,6 @@ export interface UnionLogOptionConfig {
     root?: string | string[];
     config?: {
         filename: string;
-        date: boolean;
         path?: string | string[];
     };
 }

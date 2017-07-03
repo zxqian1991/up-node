@@ -13,12 +13,13 @@ export class UnionApp {
         };
         me.initConfig(config).then(async ()=>{
             me.logger = new UnionLog(me.config.logger);
-            me.logger.trace(`正在启动程序请稍后...`.blue);
+            me.logger.info(`正在启动程序请稍后...`.blue);
             process.env.PORT = me.config.port.toString();
             me.app = new Koa();
             await me.initApp();
             me.app.listen(me.config.port);
-            me.logger.error(`程序已启动,请访问${util.interface.getBeautyStrOfIp(me.config.port)}`.green);
+            me.logger.info(`程序已启动,请访问${util.interface.getBeautyStrOfIp(me.config.port)}`.green);
+            let logger = UnionLog.getLogger("qianzhixiang");
         });
     };
     logger: UnionLog;
@@ -34,5 +35,3 @@ export class UnionApp {
 
     }
 };
-let logger = UnionLog.getLogger("qianzhixiang");
-logger.info("情况数据看那看季度年");
