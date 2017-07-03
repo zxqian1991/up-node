@@ -1,4 +1,2 @@
-const app = require("./build/index").UnionApp;
-new app({
-    port: 9098
-});
+let UnionApp = require("./build").UnionApp;
+new UnionApp();

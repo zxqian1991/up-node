@@ -1,3 +1,5 @@
+/// <reference types="node" />
+import * as fs from "fs";
 declare const util: {
     path: {
         getFullPath(url?: string, pre?: string): string;
@@ -18,11 +20,23 @@ declare const util: {
     array: {};
     math: {};
     date: {
-        getLocalDateString(date?: Date, ifBeauty?: boolean): string;
+        getLocalDateString(date?: Date): string;
     };
     interface: {
         getAllIps(): string[];
         getBeautyStrOfIp(port: number, proxy?: string): string;
     };
+    file: {
+        exists: (filename: string) => Promise<fs.Stats>;
+        existsSync: (filename: string) => fs.Stats;
+        fileExists: (filename: string) => Promise<{}>;
+        fileExistsSync: (filename: string) => boolean;
+        directoryExists: (filename: string) => Promise<{}>;
+        directoryExistsSync: (filename: string) => boolean;
+    };
+    merge: {
+        default: (obj1: any, obj2: any) => any;
+        deep: (obj1: any, obj2: any, obj2p?: any[]) => any;
+    };
 };
-export { util };
+export default util;

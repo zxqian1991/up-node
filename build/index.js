@@ -38,21 +38,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("colors");
 var Koa = require("koa");
 var util_1 = require("./util");
+var logger_1 = require("./logger");
 var UnionApp = (function () {
     function UnionApp(config) {
         var _this = this;
         var me = this;
+        if (!config || typeof config == "string") {
+            console.log(util_1.default.path.getFullPath(config || "upp.config.js"));
+            config = require(util_1.default.path.getFullPath(config || "upp.config.js"));
+        }
+        ;
         me.config = config;
-        console.log(util_1.util.date.getLocalDateString(), "\u6B63\u5728\u542F\u52A8\u7A0B\u5E8F\u8BF7\u7A0D\u540E...".blue);
+        console.log(util_1.default.date.getLocalDateString(), "\u6B63\u5728\u542F\u52A8\u7A0B\u5E8F\u8BF7\u7A0D\u540E...".blue);
         me.initConfig().then(function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                process.env.PORT = me.config.port.toString();
-                me.app = new Koa();
-                me.app.listen(me.config.port);
-                console.log("" + util_1.util.date.getLocalDateString(), "\u7A0B\u5E8F\u5DF2\u542F\u52A8,\u8BF7\u8BBF\u95EE".yellow, "" + util_1.util.interface.getBeautyStrOfIp(me.config.port));
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        me.logger = new logger_1.default(me.config.logger);
+                        process.env.PORT = me.config.port.toString();
+                        me.app = new Koa();
+                        return [4 /*yield*/, me.initApp()];
+                    case 1:
+                        _a.sent();
+                        me.app.listen(me.config.port);
+                        me.logger.error(("\u7A0B\u5E8F\u5DF2\u542F\u52A8,\u8BF7\u8BBF\u95EE" + util_1.default.interface.getBeautyStrOfIp(me.config.port)).green, 1);
+                        return [2 /*return*/];
+                }
             });
-        }); });
+        }); })
+            .catch(function (e) {
+        });
     }
     ;
     // 初始化配置
@@ -64,6 +79,14 @@ var UnionApp = (function () {
         });
     };
     ;
+    // 初始化app
+    UnionApp.prototype.initApp = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/];
+            });
+        });
+    };
     return UnionApp;
 }());
 exports.UnionApp = UnionApp;
