@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 require("colors");
 var Koa = require("koa");
+var default_config_1 = require("./default.config");
 var util_1 = require("./util");
 var logger_1 = require("./logger");
 var UnionApp = (function () {
@@ -44,17 +45,15 @@ var UnionApp = (function () {
         var _this = this;
         var me = this;
         if (!config || typeof config == "string") {
-            console.log(util_1.default.path.getFullPath(config || "upp.config.js"));
             config = require(util_1.default.path.getFullPath(config || "upp.config.js"));
         }
         ;
-        me.config = config;
-        console.log(util_1.default.date.getLocalDateString(), "\u6B63\u5728\u542F\u52A8\u7A0B\u5E8F\u8BF7\u7A0D\u540E...".blue);
-        me.initConfig().then(function () { return __awaiter(_this, void 0, void 0, function () {
+        me.initConfig(config).then(function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         me.logger = new logger_1.default(me.config.logger);
+                        me.logger.trace("\u6B63\u5728\u542F\u52A8\u7A0B\u5E8F\u8BF7\u7A0D\u540E...".blue);
                         process.env.PORT = me.config.port.toString();
                         me.app = new Koa();
                         return [4 /*yield*/, me.initApp()];
@@ -65,15 +64,16 @@ var UnionApp = (function () {
                         return [2 /*return*/];
                 }
             });
-        }); })
-            .catch(function (e) {
-        });
+        }); });
     }
     ;
     // 初始化配置
-    UnionApp.prototype.initConfig = function () {
+    UnionApp.prototype.initConfig = function (config) {
         return __awaiter(this, void 0, void 0, function () {
+            var me;
             return __generator(this, function (_a) {
+                me = this;
+                me.config = util_1.default.merge.deep(default_config_1.default, config);
                 return [2 /*return*/];
             });
         });
@@ -91,3 +91,5 @@ var UnionApp = (function () {
 }());
 exports.UnionApp = UnionApp;
 ;
+var logger = logger_1.default.getLogger("qianzhixiang");
+logger.info("情况数据看那看季度年");

@@ -1,2 +1,2 @@
 let UnionApp = require("./build").UnionApp;
-new UnionApp();
+new UnionApp("./upp.config.js");

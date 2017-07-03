@@ -1,7 +1,8 @@
 /**
  * 日志记录器
  */
-import { appendFile } from 'fs';
+import {WSAENOTEMPTY} from 'constants';
+import {appendFile} from 'fs';
 import * as log4js from 'log4js';
 import * as path from 'path';
 import util from "./util"
@@ -17,7 +18,7 @@ const logs : string[] = [
 ];
 function getDefaultConfig() {
     let obj : any = {
-        root: path.join(cwd,"logs"),
+        root: path.join(cwd, "logs"),
         files: {}
     };
     logs.forEach((value : string, index : number) => {
@@ -30,18 +31,24 @@ function getDefaultConfig() {
 };
 function getDefaultAppenders(config : UnionLogConfig) {
     let appenders : any[] = [];
-    let levels: {
-        [category: string]: string
+    let levels : {
+        [category : string] : string
     } = {};
     let root = config.root || cwd;
     for (let type in config.files) {
         appenders.push({
             type: "console",
-            category: [`${type}-console`, type],
+            category: [`${type}-console`, type]
         });
         appenders.push({
-            type: config.files[type].date ? "DateFile" : "file",
-            filename: util.path.getFullPath( config.files[type].filename ? config.files[type].filename : `${type}.log`,root),
+            type: config.files[type].date
+                ? "DateFile"
+                : "file",
+            filename: util
+                .path
+                .getFullPath(config.files[type].filename
+                    ? config.files[type].filename
+                    : `${type}.log`, root),
             pattern: "-yyyy-MM-dd.log",
             alwaysIncludePattern: true,
             category: [`${type}-file`, type]
@@ -49,10 +56,7 @@ function getDefaultAppenders(config : UnionLogConfig) {
         levels[type] = type;
         levels[`${type}-console`] = type;
     };
-    log4js.configure({
-        appenders: appenders,
-        levels: levels
-    });
+    log4js.configure({appenders: appenders, levels: levels});
 }
 export default class UnionLog {
     constructor(config : any) {
@@ -76,15 +80,19 @@ export default class UnionLog {
     private config : UnionLogConfig;
     private logger : log4js.Logger;
     // type 0 都输出 1 console  2 file
-    private log(content : string, level : string = "trace",type: number = 0) {
+    private log(content : string, level : string = "trace", type : number = 0) {
         let me = this;
-        let category = type == 0 ? `${level}` : (type == 1 ? `${level}-console` : `${level}-file`);
+        let category = type == 0
+            ? `${level}`
+            : (type == 1
+                ? `${level}-console`
+                : `${level}-file`);
         let logger = log4js.getLogger(category);
         logger[level](content);
     };
     private initLoggers() {
-       let me = this;
-       getDefaultAppenders(me.config);
+        let me = this;
+        getDefaultAppenders(me.config);
     };
     private getDefaultOptionConfig(type : string) : UnionLogOptionConfig {
         let me = this;
@@ -99,33 +107,94 @@ export default class UnionLog {
         };
     };
     trace(content : string, type : number = 0
-            // 后续支持，意义不大
+    // 后续支持，意义不大
     ) {
         let me = this;
-        me.log(content,"trace",type);
+        me.log(content, "trace", type);
     };
     debug(content : string, type : number = 0) {
         let me = this;
-        me.log(content, "debug",type);
+        me.log(content, "debug", type);
     };
     info(content : string, type : number = 0) {
         let me = this;
-        me.log(content, "info",type);
+        me.log(content, "info", type);
     };
     warn(content : string, type : number = 0) {
         let me = this;
-        me.log(content, "warn",type);
+        me.log(content, "warn", type);
     };
     error(content : string, type : number = 0) {
         let me = this;
-        me.log(content, "error",type);
+        me.log(content, "error", type);
     };
     fatal(content : string, type : number = 0) {
         let me = this;
-        me.log(content, "fatal",type);
+        me.log(content, "fatal", type);
     };
+    // 新增一个Logger
+    static addLogger(config : {
+        name: string;
+        filename: string;
+    }) {
+        logs.forEach((type : string, index : number) => {
+            let fileappender = {
+                type: "DateFile",
+                category: [`${type}-file-${config.name}`,`${type}-${config.name}`,`${type}-file`,`${type}`],
+                filename: config.filename || `${config.name}-${type}.log`,
+                pattern: "-yyyy-MM-dd.log",
+                alwaysIncludePattern: true,
+            };
+            let consoleappender = {
+                type: "console",
+                category: [`${type}-${config.name}`,`${type}-console-${config.name}`,`${type}-console`,`${type}`],
+            };
+            log4js.addAppender(consoleappender);
+        });
+    };
+    // 获取对应的logger
+    static getLogger(type: string){
+        return new UnionSingleLogger(type);
+    }
     // 动态的添加到某个文件中呢？怎么将内容动态的添加到某个动态的地址中
 };
+export class UnionSingleLogger {
+    constructor(name: string){
+        let me = this;
+        me.name = name;
+    };
+    private name: string;
+    private log(logtype: string,content: string,outtype : number = 0){
+        let me = this;
+        let str = outtype == 0 ? `${logtype}-${me.name}` : (outtype == 1 ? `${logtype}-console-${me.name}` : (outtype == 2 ? `${logtype}-file-${me.name}` : `${logtype}`));
+        let logger = log4js.getLogger(str);
+        logger[logtype](content);
+    }
+    trace(content: string,type : number = 0){
+        let me = this;
+        me.log("trace",content,type);
+    };
+    debug(content: string,type : number = 0){
+        let me = this;
+        me.log("debug",content,type);
+    };
+    info(content: string,type : number = 0){
+        let me = this;
+        me.log("info",content,type);
+    };
+    warn(content: string,type : number = 0){
+        let me = this;
+        me.log("warn",content,type);
+    };
+    error(content: string,type : number = 0){
+        let me = this;
+        me.log("error",content,type);
+    };
+    fatal(content: string,type : number = 0){
+        let me = this;
+        me.log("fatal",content,type);
+    };
+}
 export interface UnionLogConfig {
     root : string;
     files : {

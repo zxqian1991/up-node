@@ -7,6 +7,6 @@ export declare class UnionApp {
     logger: UnionLog;
     app: Koa;
     config: UnionAppConfig;
-    initConfig(): Promise<void>;
+    initConfig(config: any): Promise<void>;
     initApp(): Promise<void>;
 }

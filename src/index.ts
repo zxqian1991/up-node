@@ -9,32 +9,30 @@ export class UnionApp {
     constructor(config : UnionAppConfig | string) {
         let me = this;
         if(!config || typeof config == "string") {
-            console.log(util.path.getFullPath((config as string) || "upp.config.js"))
             config = require(util.path.getFullPath((config as string) || "upp.config.js"))
         };
-        me.config = config as UnionAppConfig;
-        console.log(util.date.getLocalDateString() ,`正在启动程序请稍后...`.blue);
-        me.initConfig().then(async ()=>{
+        me.initConfig(config).then(async ()=>{
             me.logger = new UnionLog(me.config.logger);
+            me.logger.trace(`正在启动程序请稍后...`.blue);
             process.env.PORT = me.config.port.toString();
             me.app = new Koa();
             await me.initApp();
             me.app.listen(me.config.port);
             me.logger.error(`程序已启动,请访问${util.interface.getBeautyStrOfIp(me.config.port)}`.green);
-        })
-        .catch((e)=>{
-
-        })
+        });
     };
     logger: UnionLog;
     app: Koa;
     config: UnionAppConfig;
     // 初始化配置
-    async initConfig() {
-
+    async initConfig(config:any){
+        let me = this;
+        me.config = util.merge.deep(defaultConfig,config);
     };
     // 初始化app
     async initApp(){
 
     }
 };
+let logger = UnionLog.getLogger("qianzhixiang");
+logger.info("情况数据看那看季度年");

@@ -12,6 +12,22 @@ export default class UnionLog {
     warn(content: string, type?: number): void;
     error(content: string, type?: number): void;
     fatal(content: string, type?: number): void;
+    static addLogger(config: {
+        name: string;
+        filename: string;
+    }): void;
+    static getLogger(type: string): UnionSingleLogger;
+}
+export declare class UnionSingleLogger {
+    constructor(name: string);
+    private name;
+    private log(logtype, content, outtype?);
+    trace(content: string, type?: number): void;
+    debug(content: string, type?: number): void;
+    info(content: string, type?: number): void;
+    warn(content: string, type?: number): void;
+    error(content: string, type?: number): void;
+    fatal(content: string, type?: number): void;
 }
 export interface UnionLogConfig {
     root: string;
