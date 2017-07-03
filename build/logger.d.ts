@@ -22,6 +22,7 @@ export interface UnionLogConfig {
             path?: string | string[];
         };
     };
+    layout?: string;
 }
 export interface UnionLogOptionConfig {
     useDefault?: boolean;

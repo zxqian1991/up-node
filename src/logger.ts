@@ -37,7 +37,7 @@ function getDefaultAppenders(config : UnionLogConfig) {
     for (let type in config.files) {
         appenders.push({
             type: "console",
-            category: [`${type}-console`, type]
+            category: [`${type}-console`, type],
         });
         appenders.push({
             type: config.files[type].date ? "DateFile" : "file",
@@ -134,7 +134,8 @@ export interface UnionLogConfig {
             filename: string;
             path?: string | string[]
         }
-    }
+    },
+    layout?: string;
 };
 export interface UnionLogOptionConfig {
     useDefault?: boolean; // 是否使用默认配置

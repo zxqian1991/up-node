@@ -61,7 +61,7 @@ var UnionApp = (function () {
                     case 1:
                         _a.sent();
                         me.app.listen(me.config.port);
-                        me.logger.error(("\u7A0B\u5E8F\u5DF2\u542F\u52A8,\u8BF7\u8BBF\u95EE" + util_1.default.interface.getBeautyStrOfIp(me.config.port)).green, 1);
+                        me.logger.error(("\u7A0B\u5E8F\u5DF2\u542F\u52A8,\u8BF7\u8BBF\u95EE" + util_1.default.interface.getBeautyStrOfIp(me.config.port)).green);
                         return [2 /*return*/];
                 }
             });

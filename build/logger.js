@@ -33,7 +33,7 @@ function getDefaultAppenders(config) {
     for (var type in config.files) {
         appenders.push({
             type: "console",
-            category: [type + "-console", type]
+            category: [type + "-console", type],
         });
         appenders.push({
             type: config.files[type].date ? "DateFile" : "file",

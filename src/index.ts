@@ -20,7 +20,7 @@ export class UnionApp {
             me.app = new Koa();
             await me.initApp();
             me.app.listen(me.config.port);
-            me.logger.error(`程序已启动,请访问${util.interface.getBeautyStrOfIp(me.config.port)}`.green,1);
+            me.logger.error(`程序已启动,请访问${util.interface.getBeautyStrOfIp(me.config.port)}`.green);
         })
         .catch((e)=>{
 
