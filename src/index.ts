@@ -1,15 +1,18 @@
-require("colors");
+import "colors";
 import * as Koa from "koa";
 import * as path from "path";
 import defaultConfig from "./default.config";
-import util from "./util";
+import {getFullPath} from "./utils/path";
 import UnionLog from "./logger";
 import { UnionAppConfig } from './default.config';
+import { getBeautyStrOfIp } from './utils/interface';
+import { deep } from './utils/merge';
+import { UnionPlugins } from './plugins/index';
 export class UnionApp {
     constructor(config : UnionAppConfig | string) {
         let me = this;
         if(!config || typeof config == "string") {
-            config = require(util.path.getFullPath((config as string) || "upp.config.js"))
+            config = require(getFullPath((config as string) || "upp.config.js"))
         };
         me.initConfig(config).then(async ()=>{
             me.logger = new UnionLog(me.config.logger);
@@ -18,20 +21,22 @@ export class UnionApp {
             me.app = new Koa();
             await me.initApp();
             me.app.listen(me.config.port);
-            me.logger.info(`程序已启动,请访问${util.interface.getBeautyStrOfIp(me.config.port)}`.green);
+            me.logger.info(`程序已启动,请访问${getBeautyStrOfIp(me.config.port)}`.cyan);
             let logger = UnionLog.getLogger("qianzhixiang");
         });
     };
     logger: UnionLog;
     app: Koa;
     config: UnionAppConfig;
+    plugins: UnionPlugins;
     // 初始化配置
     async initConfig(config:any){
         let me = this;
-        me.config = util.merge.deep(defaultConfig,config);
+        me.config = deep(defaultConfig,config);
     };
     // 初始化app
     async initApp(){
-
+        let me = this;
+        me.plugins = new UnionPlugins(me.config.plugins,me.app);
     }
 };

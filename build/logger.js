@@ -2,7 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var log4js = require("log4js");
 var path = require("path");
-var util_1 = require("./util");
+var path_1 = require("./utils/path");
+var type_1 = require("./utils/type");
+var file_1 = require("./utils/file");
+var merge_1 = require("./utils/merge");
 var cwd = process.cwd();
 var logs = [
     "trace",
@@ -40,9 +43,7 @@ function getDefaultAppenders(config) {
                 category: [
                     type + "-file-" + name, type + "-" + name, type + "-file", "" + type
                 ],
-                filename: util_1.default
-                    .path
-                    .getFullPath(_filename
+                filename: path_1.getFullPath(_filename
                     ? _filename
                     : name + "/" + type + ".log", root),
                 pattern: "-yyyy-MM-dd.log",
@@ -74,13 +75,11 @@ var UnionLog = (function () {
         var me = this;
         config = config || {};
         // 如果是路径，加载该路径下内容
-        if (util_1.default.type.isString(config) && util_1.default.file.fileExistsSync(config)) {
-            config = require(util_1.default.path.getFullPath(config));
+        if (type_1.isString(config) && file_1.fileExistsSync(config)) {
+            config = require(path_1.getFullPath(config));
         }
         ;
-        me.config = util_1.default
-            .merge
-            .deep(getDefaultConfig(), config);
+        me.config = merge_1.deep(getDefaultConfig(), config);
         return me.config;
     };
     ;

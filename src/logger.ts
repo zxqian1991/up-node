@@ -5,8 +5,11 @@ import {WSAENOTEMPTY} from 'constants';
 import {appendFile} from 'fs';
 import * as log4js from 'log4js';
 import * as path from 'path';
-import util from "./util"
 import {UnionAppConfig} from './default.config';
+import { getFullPath } from './utils/path';
+import { isString } from './utils/type';
+import { fileExistsSync } from './utils/file';
+import { deep } from './utils/merge';
 const cwd : string = process.cwd();
 const logs : string[] = [
     "trace",
@@ -43,9 +46,7 @@ function getDefaultAppenders(config : UnionLogConfig) {
                 category: [
                     `${type}-file-${name}`, `${type}-${name}`, `${type}-file`, `${type}`
                 ],
-                filename: util
-                    .path
-                    .getFullPath(_filename
+                filename: getFullPath(_filename
                         ? _filename
                         : `${name}/${type}.log`, root),
                 pattern: "-yyyy-MM-dd.log",
@@ -75,12 +76,10 @@ export default class UnionLog {
         let me = this;
         config = config || {};
         // 如果是路径，加载该路径下内容
-        if (util.type.isString(config) && util.file.fileExistsSync(config)) {
-            config = require(util.path.getFullPath(config));
+        if (isString(config) && fileExistsSync(config)) {
+            config = require(getFullPath(config));
         };
-        me.config = util
-            .merge
-            .deep(getDefaultConfig(), config);
+        me.config = deep(getDefaultConfig(), config);
         return me.config;
     };
     private config : UnionLogConfig;

@@ -1,0 +1,10 @@
+export declare function isObject(value: any): boolean;
+export declare function isArray(value: any): boolean;
+export declare function isPromise(value: any): boolean;
+export declare function isIterator(value: any): any;
+export declare function isString(value: any): boolean;
+export declare function isNumber(value: any): boolean;
+export declare function isBoolean(value: any): boolean;
+export declare function isSymbol(value: any): boolean;
+export declare function isUndefined(value: any): boolean;
+export declare function isNull(value: any): boolean;

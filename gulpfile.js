@@ -11,11 +11,19 @@ const watch = require("gulp-watch");
 const rimraf = require("rimraf");
 const replaceExt = require('replace-ext');
 const tsProject = ts.createProject('tsconfig.json');
-gulp.task("default", function() {
+gulp.task("default", ["rm"], function() {
+    console.log("开始编译");
+    // 根据不同的路径去进行分类
     gulp.src(path.join(src, "**/**.ts"))
         .pipe(tsProject())
         .pipe(gulp.dest(build));
 });
+gulp.task("rm", async function(cb) {
+    cb = cb || function() {};
+    console.log("即将删除:".green, build.yellow);
+    rimraf.sync(build);
+    console.log("删除成功".green);
+})
 gulp.task("watch", function() {
     watch(path.join(src, "**/**"), function(folder, option) {
         let date = new Date();

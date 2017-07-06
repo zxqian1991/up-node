@@ -38,14 +38,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("colors");
 var Koa = require("koa");
 var default_config_1 = require("./default.config");
-var util_1 = require("./util");
+var path_1 = require("./utils/path");
 var logger_1 = require("./logger");
+var interface_1 = require("./utils/interface");
+var merge_1 = require("./utils/merge");
+var index_1 = require("./plugins/index");
 var UnionApp = (function () {
     function UnionApp(config) {
         var _this = this;
         var me = this;
         if (!config || typeof config == "string") {
-            config = require(util_1.default.path.getFullPath(config || "upp.config.js"));
+            config = require(path_1.getFullPath(config || "upp.config.js"));
         }
         ;
         me.initConfig(config).then(function () { return __awaiter(_this, void 0, void 0, function () {
@@ -61,7 +64,7 @@ var UnionApp = (function () {
                     case 1:
                         _a.sent();
                         me.app.listen(me.config.port);
-                        me.logger.info(("\u7A0B\u5E8F\u5DF2\u542F\u52A8,\u8BF7\u8BBF\u95EE" + util_1.default.interface.getBeautyStrOfIp(me.config.port)).green);
+                        me.logger.info(("\u7A0B\u5E8F\u5DF2\u542F\u52A8,\u8BF7\u8BBF\u95EE" + interface_1.getBeautyStrOfIp(me.config.port)).cyan);
                         logger = logger_1.default.getLogger("qianzhixiang");
                         return [2 /*return*/];
                 }
@@ -75,7 +78,7 @@ var UnionApp = (function () {
             var me;
             return __generator(this, function (_a) {
                 me = this;
-                me.config = util_1.default.merge.deep(default_config_1.default, config);
+                me.config = merge_1.deep(default_config_1.default, config);
                 return [2 /*return*/];
             });
         });
@@ -84,7 +87,10 @@ var UnionApp = (function () {
     // 初始化app
     UnionApp.prototype.initApp = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var me;
             return __generator(this, function (_a) {
+                me = this;
+                me.plugins = new index_1.UnionPlugins(me.config.plugins, me.app);
                 return [2 /*return*/];
             });
         });

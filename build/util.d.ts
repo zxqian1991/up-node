@@ -17,7 +17,13 @@ declare const util: {
         isNull(value: any): boolean;
         isNaN(value: any): boolean;
     };
-    array: {};
+    array: {
+        orderByKey(arr: any[], key: string, ifasync?: boolean): any;
+        quick(arr: any[], ifasync?: boolean, ifUseNew?: boolean, getValue?: Function): void;
+        heap(arr: any[], ifasync?: boolean, ifUseNew?: boolean, getValue?: Function): any[];
+        merge(arr: any[], ifasync?: boolean, ifUseNew?: boolean, getValue?: Function, begin?: number, end?: number, ifFirst?: boolean): any[];
+        bubble(arr: any[], ifUseNew?: boolean, getValue?: Function, ifasync?: boolean): any[];
+    };
     math: {};
     date: {
         getLocalDateString(date?: Date): string;
